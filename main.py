@@ -17,6 +17,8 @@ class Exercise1:
 
         self.board =   game_board 
         self.iterations = 0
+        self.game_iterations = 1
+
         self.reward = 0
         self.alpha = 0.7
         self.discount = 0.99
@@ -67,6 +69,7 @@ class Exercise1:
 
         if(self.agentPosition == self.goalPosition):
             self.reward += 100
+            self.game_iterations = 1
             return True
         self.reward += 0
         return False
@@ -89,7 +92,7 @@ class Exercise1:
         return agentPosition[0]*np.asarray(self.board).shape[1]+agentPosition[1]
 
     def updateQValues(self, state_index,action_index):
-        reward_s_a = self.reward
+        reward_s_a = self.reward/self.game_iterations
 
         q_s_a = self.qtable[state_index][action_index]
         if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index - 1
@@ -103,6 +106,7 @@ class Exercise1:
 
         self.updateQValues(self.getAgentStatePosition(self.agentPosition), self.mapActionNameToIndex(action.__name__))
         self.iterations += 1
+        self.game_iterations += 1
         self.agentPosition = state
         position = action()
         if(self.reachedPosition()):
@@ -112,13 +116,13 @@ class Exercise1:
         return position
 
 
-    def runTest(self):
+    def runTest(self, iterations):
         game_test = Exercise1(self.board, self.qtable)
 
         it = 0
         agentPosition = [0, 0]
         rewards = []
-        while(it < 1000):
+        while(it < iterations):
             it += 1
             action_space_index = game_test.getAgentStatePosition(agentPosition)
             action_space = self.qtable[action_space_index]
@@ -146,6 +150,7 @@ class Exercise1:
         return game_test
 if (__name__ == "__main__"):
     numberOfTests = 2
+    test_iterations = 1000
     trainResults = []
     testResults = []
 
@@ -172,13 +177,13 @@ if (__name__ == "__main__"):
                 # time.sleep(0.2)
                 # system('clear')
                 if(game.iterations in testEpochs):
-                    game_test = game.runTest()
+                    game_test = game.runTest(test_iterations)
                     # stdev = statistics.stdev(rewards)
 
 
                     testResults.append({
                         'epoch':game.iterations,
-                        'reward':game_test.reward,
+                        'reward':game_test.reward/test_iterations,
 
                     })
                     with open('results.json', 'w') as outfile:
