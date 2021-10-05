@@ -6,7 +6,11 @@ from os import system
 import numpy as np
 import matplotlib.pyplot as plt
 import statistics
+import pygame
 import json
+# import tkinter as tk
+
+# from gameBoard import GameBoard
 class Exercise1:
 
 
@@ -14,14 +18,13 @@ class Exercise1:
         self.board_square = colored(' ▄ ', 'white', attrs=['reverse', 'blink'])
         self.agent_icon = colored(' ▄ ', 'red', attrs=['reverse', 'blink'])
         self.reward_icon = colored(' ▄ ', 'blue', attrs=['reverse', 'blink'])
-
-        self.board =   game_board 
+        self.board = game_board 
         self.iterations = 0
         self.game_iterations = 1
 
         self.reward = 0
-        self.alpha = 0.7
-        self.discount = 0.99
+        self.alpha = 0.1
+        self.discount = 0.5
         self.agentPosition = [0, 0]
         self.qtable = qtable
         self.defaultAgentPosition = [0, 0]
@@ -92,7 +95,7 @@ class Exercise1:
         return agentPosition[0]*np.asarray(self.board).shape[1]+agentPosition[1]
 
     def updateQValues(self, state_index,action_index):
-        reward_s_a = self.reward/self.game_iterations
+        reward_s_a = self.reward
 
         q_s_a = self.qtable[state_index][action_index]
         if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index - 1
@@ -152,20 +155,22 @@ if (__name__ == "__main__"):
     numberOfTests = 2
     test_iterations = 1000
     trainResults = []
-    testResults = []
+    testResults = {}
+    num_cols = 10
+    num_rows = 10
 
     testEpochs = [100, 200, 500, 600, 700, 800, 900, 1000, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000]
-    game_board = [[colored(' ▄ ', 'white', attrs=['reverse', 'blink'])] * 10 for i in range(10) ]
+    game_board = [[colored(' ▄ ', 'white', attrs=['reverse', 'blink'])] * num_cols for i in range(num_rows) ]
     for j in range(1, numberOfTests):
         agentPosition = [0, 0]
-        episodes = 30
-        epochs = 20000
+        episodes = 2
+        epochs = 10000
         rewards = []
         # print()
         # raise Exception
         qtable = np.zeros(shape=(len(np.asarray(game_board).flatten()), 4))
 
-        for i in range(1, episodes):
+        for episode in range(1, episodes):
             seed = time.time()
             random.seed(seed)
             # 4 porque temos 4 acoes possiveis?
@@ -180,12 +185,19 @@ if (__name__ == "__main__"):
                     game_test = game.runTest(test_iterations)
                     # stdev = statistics.stdev(rewards)
 
-
-                    testResults.append({
-                        'epoch':game.iterations,
-                        'reward':game_test.reward/test_iterations,
-
-                    })
+                    if(testResults[episode] is not None):
+                        testResults[episode] = [
+                            {
+                            'epoch':game.iterations,
+                            'reward':game_test.reward/test_iterations
+                            }
+                        ]
+                    else:
+                        testResults[episode].append({
+                            'epoch':game.iterations,
+                            'reward':game_test.reward/test_iterations
+                        })
+                    
                     with open('results.json', 'w') as outfile:
                         json.dump(testResults, outfile)
 
@@ -201,6 +213,13 @@ if (__name__ == "__main__"):
                     agentPosition = game.stateTransaction(agentPosition, game.moveRight)
                 else:
                     agentPosition = game.stateTransaction(agentPosition, game.moveLeft)
+
+            heatmap = game.qtable.mean(1)/(game.iterations*episode)
+            heatmap = heatmap.reshape(num_rows, num_cols)
+            # a = np.random.random((16, 16))
+            plt.imshow(heatmap, cmap='hot', interpolation='nearest')
+            plt.colorbar()
+            plt.show()
 
                 # game.print_board()
                 # print(f"----Reward {game.reward} Number of iteration: {game.iterations} ----")
