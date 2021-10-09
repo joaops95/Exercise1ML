@@ -18,8 +18,8 @@ class Exercise1:
         self.board =   game_board 
         self.iterations = 0
         self.reward = 0
-        self.alpha = 0.7
-        self.discount = 0.99
+        self.alpha = 0.1
+        self.discount = 0.50
         self.agentPosition = [0, 0]
         self.qtable = qtable
         self.defaultAgentPosition = [0, 0]
@@ -150,7 +150,7 @@ if (__name__ == "__main__"):
     testResults = []
 
     testEpochs = [100, 200, 500, 600, 700, 800, 900, 1000, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000]
-    game_board = [[colored(' ▄ ', 'white', attrs=['reverse', 'blink'])] * 10 for i in range(10) ]
+    game_board = [[colored(' ▄ ', 'white', attrs=['reverse', 'blink'])] * 15 for i in range(15) ]
     for j in range(1, numberOfTests):
         agentPosition = [0, 0]
         episodes = 30
@@ -160,7 +160,7 @@ if (__name__ == "__main__"):
         # raise Exception
         qtable = np.zeros(shape=(len(np.asarray(game_board).flatten()), 4))
 
-        for i in range(1, episodes):
+        for ep in range(1, episodes):
             seed = time.time()
             random.seed(seed)
             # 4 porque temos 4 acoes possiveis?
@@ -177,12 +177,13 @@ if (__name__ == "__main__"):
 
 
                     testResults.append({
+                        'episode':ep,
                         'epoch':game.iterations,
                         'reward':game_test.reward,
 
                     })
                     with open('results.json', 'w') as outfile:
-                        json.dump(testResults, outfile)
+                        json.dump(testResults, outfile, indent=4, sort_keys=True)
 
                     system('clear')
 
