@@ -1,117 +1,30 @@
-[
-    {
-        "episode": 1,
-        "epoch": 100,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 200,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 500,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 600,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 700,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 800,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 900,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 1000,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 2500,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 5000,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 7500,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 10000,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 12500,
-        "reward": 0
-    },
-    {
-        "episode": 1,
-        "epoch": 15000,
-        "reward": 400
-    },
-    {
-        "episode": 1,
-        "epoch": 17500,
-        "reward": 0
-    },
-    {
-        "episode": 2,
-        "epoch": 100,
-        "reward": 1300
-    },
-    {
-        "episode": 2,
-        "epoch": 200,
-        "reward": 1600
-    },
-    {
-        "episode": 2,
-        "epoch": 500,
-        "reward": 700
-    },
-    {
-        "episode": 2,
-        "epoch": 600,
-        "reward": 800
-    },
-    {
-        "episode": 2,
-        "epoch": 700,
-        "reward": 500
-    },
-    {
-        "episode": 2,
-        "epoch": 800,
-        "reward": 0
-    },
-    {
-        "episode": 2,
-        "epoch": 900,
-        "reward": 500
-    },
-    {
-        "episode": 2,
-        "epoch": 1000,
-        "reward": 400
+{
+    "1": {
+        "results": [
+            {
+                "epoch": 100,
+                "reward": 0.0
+            },
+            {
+                "epoch": 200,
+                "reward": 0.0
+            },
+            {
+                "epoch": 500,
+                "reward": 0.0
+            },
+            {
+                "epoch": 600,
+                "reward": 0.0
+            },
+            {
+                "epoch": 700,
+                "reward": 0.0
+            },
+            {
+                "epoch": 800,
+                "reward": 0.0
+            }
+        ]
     }
-]
+}
