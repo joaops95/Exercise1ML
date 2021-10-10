@@ -24,8 +24,8 @@ class Exercise1:
         self.game_iterations = 1
 
         self.reward = 0
-        self.alpha = 0.7
-        self.discount = 0.99
+        self.alpha = 0.2
+        self.discount = 0.6
         self.agentPosition = [0, 0]
         self.qtable = qtable
         self.defaultAgentPosition = [0, 0]
@@ -79,6 +79,13 @@ class Exercise1:
         self.reward += 0
         return False
 
+
+    def getRewardForPosition(self):
+
+        if(self.agentPosition == self.goalPosition):
+            return 100
+        return 0
+
     def mapActionNameToIndex(self, action_name):
         res = isinstance(action_name, str)
         if(res):
@@ -97,7 +104,7 @@ class Exercise1:
         return agentPosition[0]*np.asarray(self.board).shape[1]+agentPosition[1]
 
     def updateQValues(self, state_index,action_index):
-        reward_s_a = self.reward/self.game_iterations
+        reward_s_a = self.reward
 
         q_s_a = self.qtable[state_index][action_index]
         if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index - 1
@@ -204,8 +211,8 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
     test_iterations = 1000
     trainResults = []
     testResults = {}
-    num_cols = 7
-    num_rows = 7
+    num_cols = 10
+    num_rows = 10
 
     walls = [
         {
