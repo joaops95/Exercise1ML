@@ -8,9 +8,10 @@ import matplotlib.pyplot as plt
 import statistics
 import sys
 import json
-# import tkinter as tk
+import tkinter as tk
+import matplotlib.cm as cm
 
-# from gameBoard import GameBoard
+from gameBoard import GameBoard
 class Exercise1:
 
 
@@ -23,13 +24,14 @@ class Exercise1:
         self.game_iterations = 1
 
         self.reward = 0
-        self.alpha = 0.1
-        self.discount = 0.5
+        self.alpha = 0.7
+        self.discount = 0.99
         self.agentPosition = [0, 0]
         self.qtable = qtable
         self.defaultAgentPosition = [0, 0]
         # print(len(self.board[1]))
         self.goalPosition = [len(self.board) -1 , len(self.board[0]) -1]
+       
 
     # for printing the board
     def print_board(self):
@@ -95,7 +97,7 @@ class Exercise1:
         return agentPosition[0]*np.asarray(self.board).shape[1]+agentPosition[1]
 
     def updateQValues(self, state_index,action_index):
-        reward_s_a = self.reward
+        reward_s_a = self.reward/self.game_iterations
 
         q_s_a = self.qtable[state_index][action_index]
         if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index - 1
@@ -114,16 +116,19 @@ class Exercise1:
         position = action()
         if(self.reachedPosition()):
             # raise Exception
-            state = self.defaultAgentPosition
+            position = self.defaultAgentPosition
         # print(position)
         return position
 
 
-    def runTest(self, iterations):
+    def runTest(self, iterations, greatboard):
         game_test = Exercise1(self.board, self.qtable)
+        agentPosition = [0, 0]
+
+
+
 
         it = 0
-        agentPosition = [0, 0]
         rewards = []
         while(it < iterations):
             it += 1
@@ -133,7 +138,7 @@ class Exercise1:
             random_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
             print("RANDOM MACTIONS")
             print(random_action)
-            system('clear')
+            # system('clear')
             if(random_action == 0):
                 agentPosition = game_test.stateTransaction(agentPosition, game_test.moveUp)
 
@@ -146,9 +151,20 @@ class Exercise1:
             else:
                 agentPosition = game_test.stateTransaction(agentPosition, game_test.moveLeft)
 
-            game_test.print_board()
+
+            greatboard.placepiece("player", agentPosition[0], agentPosition[1])
+            print("placing piece ")
+            print(agentPosition[0], agentPosition[1])
+
+            # time.sleep(0.05)
+
+            greatboard.update()
+
+            # game_test.print_board()
             
             print(f"----Reward {game_test.reward} Number of iteration: {game_test.iterations} ----")
+
+
         
         return game_test
 
@@ -183,31 +199,53 @@ def menu():
 
 
 
-def runEnv(random_probability = 1, auto_increase = False, include_episodes = True):
+def runEnv(random_probability = 1, auto_increase = False, include_episodes = False):
     numberOfTests = 1
     test_iterations = 1000
     trainResults = []
     testResults = {}
-    num_cols = 10
-    num_rows = 10
+    num_cols = 7
+    num_rows = 7
+
+    walls = [
+        {
+         'top_position': 3,
+         'length': num_cols-3
+        }
+    ]
+
     random_probability = random_probability
     qtable_probability = 1 - random_probability
 
-    testEpochs = [100, 200, 500, 600, 700, 800, 900, 1000, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 25000, 30000]
-    game_board = [[colored(' ▄ ', 'white', attrs=['reverse', 'blink'])] * num_cols for i in range(num_rows) ]
-    
-        
-    
+    testEpochs = [500, 600, 700, 800, 900, 1000, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 25000, 30000]
+    game_board = [[" "] * num_cols for i in range(num_rows) ]
+    print(game_board)
+    # raise Exception
+    root = tk.Tk()
+
+    playerimg = '''R0lGODlhEAAQAOeSAKx7Fqx8F61/G62CILCJKriIHM+HALKNMNCIANKKANOMALuRK7WOVLWPV9eRANiSANuXAN2ZAN6aAN+bAOCcAOKeANCjKOShANKnK+imAOyrAN6qSNaxPfCwAOKyJOKyJvKyANW0R/S1APW2APW3APa4APe5APm7APm8APq8AO28Ke29LO2/LO2/L+7BM+7BNO6+Re7CMu7BOe7DNPHAP+/FOO/FO+jGS+/FQO/GO/DHPOjBdfDIPPDJQPDISPDKQPDKRPDIUPHLQ/HLRerMV/HMR/LNSOvHfvLOS/rNP/LPTvLOVe/LdfPRUfPRU/PSU/LPaPPTVPPUVfTUVvLPe/LScPTWWfTXW/TXXPTXX/XYXu/SkvXZYPfVdfXaY/TYcfXaZPXaZvbWfvTYe/XbbvHWl/bdaPbeavvadffea/bebvffbfbdfPvbe/fgb/Pam/fgcvfgePTbnfbcl/bfivfjdvfjePbemfjelPXeoPjkePbfmvffnvbfofjlgffjkvfhnvjio/nnhvfjovjmlvzlmvrmpvrrmfzpp/zqq/vqr/zssvvvp/vvqfvvuPvvuvvwvfzzwP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH+FUNyZWF0ZWQgd2l0aCBUaGUgR0lNUAAh+QQBCgD/ACwAAAAAEAAQAAAIzAD/CRxIsKDBfydMlBhxcGAKNIkgPTLUpcPBJIUa+VEThswfPDQKokB0yE4aMFiiOPnCJ8PAE20Y6VnTQMsUBkWAjKFyQaCJRYLcmOFipYmRHzV89KkgkESkOme8XHmCREiOGC/2TBAowhGcAyGkKBnCwwKAFnciCAShKA4RAhyK9MAQwIMMOQ8EdhBDKMuNBQMEFPigAsoRBQM1BGLjRIiOGSxWBCmToCCMOXSW2HCBo8qWDQcvMMkzCNCbHQga/qMgAYIDBQZUyxYYEAA7'''
+
+
+
+    greatboard = GameBoard(root, rows = num_rows, columns = num_cols)
+    greatboard.pack(side="top", fill="both", expand="true", padx=4, pady=4)
+    player1 = tk.PhotoImage(data=playerimg)
+
+    greatboard.addpiece("player", player1,0 ,0)
+    greatboard.addpiece("goal", player1, num_cols - 1,num_rows - 1)
+
+
+
     for j in range(1, numberOfTests+1):
         agentPosition = [0, 0]
         episodes = 2
-        epochs = 31000
+        epochs = 20001
         rewards = []
         qtable = np.zeros(shape=(len(np.asarray(game_board).flatten()), 4))
         curr_len = 0
 
         for episode in range(1, episodes+1):
-            curr_factor = episode
+            curr_factor = episodes
             if(not include_episodes): 
                 curr_len = 0
                 curr_factor = 1
@@ -227,20 +265,24 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Tru
                         random_probability = 1 - curr_len/(len(testEpochs)*curr_factor)
 
                     print("random_probability")
+                    print(random_probability)
                     print(qtable_probability)
-                    game_test = game.runTest(test_iterations)
+                    game_test = game.runTest(test_iterations, greatboard)
                     # stdev = statistics.stdev(rewards)
                     try:
                         testResults[episode]['results'].append({
                             'epoch':game.iterations,
-                            'reward':game_test.reward/test_iterations
+                            'reward':game_test.reward,
+                            'reward_per_iteration':game_test.reward/test_iterations
+
                         })
                     except KeyError:
                         testResults[episode] = {}
                         testResults[episode]['results'] = [
                             {
                             'epoch':game.iterations,
-                            'reward':game_test.reward/test_iterations
+                            'reward':game_test.reward/test_iterations,
+                            'reward_per_iteration':game_test.reward/test_iterations
                             }
                         ]
 
@@ -248,7 +290,7 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Tru
                     with open('results.json', 'w') as outfile:
                         json.dump(testResults, outfile, indent=4, sort_keys=True)
 
-                    system('clear')
+                    # system('clear')
 
                 a_list = [1, 2]
 
@@ -260,9 +302,17 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Tru
                 print("random_probability")
                 print(distribution)
                 print(random_number[0])
+                # raise Exception
 
                 if(random_number[0] == 1):
+
                     random_action = random.randint(0, 3)
+                    print(random_action)
+                    print("BEFORE")
+
+                    print(agentPosition)
+                    last_agentPoistion = agentPosition
+                    
                     if(random_action == 0):
                         
                         agentPosition = game.stateTransaction(agentPosition, game.moveUp)
@@ -272,29 +322,41 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Tru
                         agentPosition = game.stateTransaction(agentPosition, game.moveRight)
                     else:
                         agentPosition = game.stateTransaction(agentPosition, game.moveLeft)
+                    
                 else:
-
+                    # raise Exception
                     action_space_index = game.getAgentStatePosition(agentPosition)
                     print(action_space_index)
                     action_space = game.qtable[action_space_index]
                     # raise Exception
-                    random_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
-                    if(random_action == 0):
+                    qtable_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
+                    if(qtable_action == 0):
                         
                         agentPosition = game.stateTransaction(agentPosition, game.moveUp)
-                    elif(random_action == 1):
+                    elif(qtable_action == 1):
                         agentPosition = game.stateTransaction(agentPosition, game.moveDown)
-                    elif(random_action == 2):
+                    elif(qtable_action == 2):
                         agentPosition = game.stateTransaction(agentPosition, game.moveRight)
                     else:
                         agentPosition = game.stateTransaction(agentPosition, game.moveLeft)
+                
+                print("AFTER")
+                print(agentPosition)
+                print(" ")
+                print(game.iterations)
+                game.print_board()
+                # time.sleep(0.05)
 
-
-            heatmap = game.qtable.mean(1)/(game.iterations*episode)
+            heatmap = game.qtable.max(1)/(game.iterations*episode)
             heatmap = heatmap.reshape(num_rows, num_cols)
             # a = np.random.random((16, 16))
-            plt.imshow(heatmap, cmap='hot', interpolation='nearest')
-            plt.savefig(f'assets/heatmap_ep{episode}.png')
+
+            # plt.imshow(heatmap, cmap='hot', interpolation='nearest')
+
+            im = plt.imshow(heatmap, cmap=cm.hot)
+            plt.colorbar(cmap=cm.hot)
+
+            plt.savefig(f'assets/heatmap_ep{episode}.png', bbox_inches='tight')
             testResults[episode]['heatmap_fig'] = f'assets/heatmap_ep{episode}.png'
 
 
@@ -316,10 +378,13 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Tru
             'max':np.max(rewards),
             'stdev': stdev
         })
+        greatboard.mainloop()
+
 
 if (__name__ == "__main__"):
 
     menu()
+    
 
 
     # for test in trainResults:

@@ -14,7 +14,7 @@
 # # print(a)
 import tkinter as tk
 class GameBoard(tk.Frame):
-    def __init__(self, parent, rows=10, columns=10, size=48, color1="white", color2="gray"):
+    def __init__(self, parent, rows=10, columns=10, size=48, color1="white", color2="white"):
         '''size is the size of a square, in pixels'''
 
         self.rows = rows

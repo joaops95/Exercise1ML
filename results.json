@@ -2,28 +2,14 @@
     "1": {
         "results": [
             {
-                "epoch": 100,
-                "reward": 0.0
-            },
-            {
-                "epoch": 200,
-                "reward": 0.0
-            },
-            {
                 "epoch": 500,
-                "reward": 0.0
+                "reward": 0.0,
+                "reward_per_iteration": 0.0
             },
             {
                 "epoch": 600,
-                "reward": 0.0
-            },
-            {
-                "epoch": 700,
-                "reward": 0.0
-            },
-            {
-                "epoch": 800,
-                "reward": 0.0
+                "reward": 0,
+                "reward_per_iteration": 0.0
             }
         ]
     }
