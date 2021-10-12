@@ -15,15 +15,16 @@ from gameBoard import GameBoard
 class Exercise1:
 
 
-    def __init__(self, game_board, qtable):
+    def __init__(self, game_board, walls_positions, qtable):
         self.board_square = colored(' ▄ ', 'white', attrs=['reverse', 'blink'])
         self.agent_icon = colored(' ▄ ', 'red', attrs=['reverse', 'blink'])
         self.reward_icon = colored(' ▄ ', 'blue', attrs=['reverse', 'blink'])
         self.board = game_board 
         self.iterations = 0
         self.game_iterations = 1
-
+        self.walls_positions = walls_positions
         self.reward = 0
+        self.wall_collision_pennalty = -10
         self.alpha = 0.2
         self.discount = 0.6
         self.agentPosition = [0, 0]
@@ -51,22 +52,23 @@ class Exercise1:
 
 
     def moveUp(self):
-        if(self.agentPosition[0]-1 >= 0):
+
+        if(self.agentPosition[0]-1 >= 0 and [self.agentPosition[0]-1, self.agentPosition[1]] not in self.walls_positions):
             self.agentPosition = [self.agentPosition[0]-1, self.agentPosition[1]]
         return [self.agentPosition[0], self.agentPosition[1]]
     def moveDown(self):
-        if(self.agentPosition[0]+1 < len(self.board)):
+        if(self.agentPosition[0]+1 < len(self.board) and [self.agentPosition[0]+1, self.agentPosition[1]] not in self.walls_positions):
             self.agentPosition = [self.agentPosition[0]+1, self.agentPosition[1]]
         return [self.agentPosition[0], self.agentPosition[1]]
 
     def moveRight(self):
 
-        if(self.agentPosition[1]+1 < len(self.board[0])):
+        if(self.agentPosition[1]+1 < len(self.board[0]) and [self.agentPosition[0], self.agentPosition[1]+1] not in self.walls_positions):
             self.agentPosition = [self.agentPosition[0], self.agentPosition[1]+1]
         return [self.agentPosition[0], self.agentPosition[1]]
 
     def moveLeft(self):
-        if(self.agentPosition[1]-1 >= 0):
+        if(self.agentPosition[1]-1 >= 0 and [self.agentPosition[0],self.agentPosition[1]-1] not in self.walls_positions):
             self.agentPosition = [self.agentPosition[0], self.agentPosition[1]-1]
         return [self.agentPosition[0], self.agentPosition[1]]
 
@@ -74,15 +76,27 @@ class Exercise1:
 
         if(self.agentPosition == self.goalPosition):
             self.reward += 100
-            self.game_iterations = 1
             return True
-        self.reward += 0
         return False
 
 
-    def getRewardForPosition(self):
+    def getRewardForPosition(self, postion):
 
-        if(self.agentPosition == self.goalPosition):
+        if(postion == self.goalPosition):
+            return 100
+        return 0
+
+    def getPenaltyForColisionState(self, postion):
+        # walls+
+        # for
+        if(postion == self.getAgentStatePosition(self.goalPosition)):
+            return 100
+        return 0
+
+
+    def getRewardForPositionState(self, postion):
+
+        if(postion == self.getAgentStatePosition(self.goalPosition)):
             return 100
         return 0
 
@@ -103,33 +117,56 @@ class Exercise1:
      
         return agentPosition[0]*np.asarray(self.board).shape[1]+agentPosition[1]
 
-    def updateQValues(self, state_index,action_index):
-        reward_s_a = self.reward
+    def updateQValues(self, last_state_index, state_index,action_index):
+        reward_s_a = self.getRewardForPositionState(state_index)
 
-        q_s_a = self.qtable[state_index][action_index]
-        if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index - 1
-        else: next_state_index = state_index+1
-        q_ss_aa = self.qtable[next_state_index]
+        q_s_a = self.qtable[last_state_index][action_index]
+        # print(state_index)
+        # next_state_index = state_index+1
+        # if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index
+        q_ss_aa = self.qtable[state_index]
         alpha = self.alpha
-        self.qtable[state_index][action_index] = (1-alpha)*q_s_a+alpha*(reward_s_a + self.discount * np.max(q_ss_aa))
+
+
+        self.qtable[last_state_index][action_index] = (1-alpha)*q_s_a+alpha*(reward_s_a + self.discount * np.max(q_ss_aa))
         np.savetxt('text.txt',self.qtable,fmt='%.2f')
 
     def stateTransaction(self, state, action):
 
-        self.updateQValues(self.getAgentStatePosition(self.agentPosition), self.mapActionNameToIndex(action.__name__))
+
+     
         self.iterations += 1
         self.game_iterations += 1
-        self.agentPosition = state
-        position = action()
-        if(self.reachedPosition()):
+        self.lastPosition = state
+        # if(action == "moveUp"): position = self.moveUp()
+        # if(action == "moveDown"): position = self.moveDown()
+        # if(action == "moveRight"): position = self.moveRight()
+        # if(action == "moveLeft"): position = self.moveLeft()
+        self.agentPosition = action()
+        reached = self.reachedPosition()
+
+        self.updateQValues(self.getAgentStatePosition(self.lastPosition), self.getAgentStatePosition(self.agentPosition), self.mapActionNameToIndex(action.__name__))
+
+        if(reached):
             # raise Exception
-            position = self.defaultAgentPosition
+            self.agentPosition = self.defaultAgentPosition
+            self.game_iterations = 1
+            heatmap = self.qtable.mean(1)/(self.iterations)
+            heatmap = heatmap.reshape(10,10)
+            # a = np.random.random((16, 16))qq
+
+            # plt.imshow(heatmap, cmap='hot', interpolation='nearest')
+
+            # im = plt.imshow(heatmap, cmap=cm.hot)
+            # plt.colorbar(cmap=cm.hot)
+            # plt.show()
+
         # print(position)
-        return position
+        return self.agentPosition
 
 
     def runTest(self, iterations, greatboard):
-        game_test = Exercise1(self.board, self.qtable)
+        game_test = Exercise1(self.board, self.walls_positions, self.qtable)
         agentPosition = [0, 0]
 
 
@@ -143,8 +180,7 @@ class Exercise1:
             action_space = self.qtable[action_space_index]
             # raise Exception
             random_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
-            print("RANDOM MACTIONS")
-            print(random_action)
+
             # system('clear')
             if(random_action == 0):
                 agentPosition = game_test.stateTransaction(agentPosition, game_test.moveUp)
@@ -160,8 +196,6 @@ class Exercise1:
 
 
             greatboard.placepiece("player", agentPosition[0], agentPosition[1])
-            print("placing piece ")
-            print(agentPosition[0], agentPosition[1])
 
             # time.sleep(0.05)
 
@@ -216,10 +250,30 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
     walls = [
         {
+         'bottom_position': 0,
          'top_position': 3,
+         'length': num_cols-3
+        },
+        {
+         'bottom_position': 6,
+         'top_position': 0,
          'length': num_cols-3
         }
     ]
+    wallPositions = []
+
+
+    if(len(walls) > 0):
+        for wall in walls:
+            if(wall['top_position'] != 0):
+                print(wall['length'])
+                for i in range(0, wall['length']):
+                    wallPositions.append([i, wall['top_position']])
+            if(wall['bottom_position'] != 0):
+                for i in range(0, wall['length']):
+                    wallPositions.append([num_cols - i, wall['bottom_position']])
+
+
 
     random_probability = random_probability
     qtable_probability = 1 - random_probability
@@ -234,7 +288,7 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
 
 
-    greatboard = GameBoard(root, rows = num_rows, columns = num_cols)
+    greatboard = GameBoard(root, rows = num_rows, columns = num_cols, walls = wallPositions)
     greatboard.pack(side="top", fill="both", expand="true", padx=4, pady=4)
     player1 = tk.PhotoImage(data=playerimg)
 
@@ -259,7 +313,7 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
             seed = time.time()
             random.seed(seed)
 
-            game = Exercise1(game_board, qtable)
+            game = Exercise1(game_board, wallPositions, qtable)
 
             while(game.iterations < epochs - 1):
                 # time.sleep(0.2)
@@ -347,11 +401,18 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
                     else:
                         agentPosition = game.stateTransaction(agentPosition, game.moveLeft)
                 
+                
+                greatboard.placepiece("player", agentPosition[0], agentPosition[1])
+
+                # time.sleep(0.05)
+
+                greatboard.update()
+
                 print("AFTER")
                 print(agentPosition)
                 print(" ")
                 print(game.iterations)
-                game.print_board()
+                # game.print_board()
                 # time.sleep(0.05)
 
             heatmap = game.qtable.max(1)/(game.iterations*episode)

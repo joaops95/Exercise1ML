@@ -1,5 +1,6 @@
 {
     "1": {
+        "heatmap_fig": "assets/heatmap_ep1.png",
         "results": [
             {
                 "epoch": 500,
@@ -18,8 +19,8 @@
             },
             {
                 "epoch": 800,
-                "reward": 100,
-                "reward_per_iteration": 0.1
+                "reward": 0,
+                "reward_per_iteration": 0.0
             },
             {
                 "epoch": 900,
@@ -28,6 +29,110 @@
             },
             {
                 "epoch": 1000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 2500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 5000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 7500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 10000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 12500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 15000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 17500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            }
+        ]
+    },
+    "2": {
+        "results": [
+            {
+                "epoch": 500,
+                "reward": 0.0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 600,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 700,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 800,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 900,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 1000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 2500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 5000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 7500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 10000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 12500,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 15000,
+                "reward": 0,
+                "reward_per_iteration": 0.0
+            },
+            {
+                "epoch": 17500,
                 "reward": 0,
                 "reward_per_iteration": 0.0
             }

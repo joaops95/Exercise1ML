@@ -14,7 +14,7 @@
 # # print(a)
 import tkinter as tk
 class GameBoard(tk.Frame):
-    def __init__(self, parent, rows=10, columns=10, size=48, color1="white", color2="white"):
+    def __init__(self, parent, rows=10,walls = [], columns=10, size=48, color1="white", color2="white"):
         '''size is the size of a square, in pixels'''
 
         self.rows = rows
@@ -22,6 +22,7 @@ class GameBoard(tk.Frame):
         self.size = size
         self.color1 = color1
         self.color2 = color2
+        self.walls = walls
         self.pieces = {}
         canvas_width = columns * size
         canvas_height = rows * size
@@ -54,8 +55,12 @@ class GameBoard(tk.Frame):
         self.size = min(xsize, ysize)
         self.canvas.delete("square")
         color = self.color2
+    
+        
         for row in range(self.rows):
             color = self.color1 if color == self.color2 else self.color2
+
+
             for col in range(self.columns):
                 x1 = (col * self.size)
                 y1 = (row * self.size)
@@ -63,6 +68,24 @@ class GameBoard(tk.Frame):
                 y2 = y1 + self.size
                 self.canvas.create_rectangle(x1, y1, x2, y2, outline="black", fill=color, tags="square")
                 color = self.color1 if color == self.color2 else self.color2
+
+
+        if(len(self.walls) > 0):
+
+            for wall in self.walls:
+                x1 = (wall[1] * self.size)
+                y1 = (wall[0] * self.size)
+                x2 = x1 + self.size
+                y2 = y1 + self.size
+
+                print(wall[0])
+                print(wall[1])
+                # raise Exception
+                self.canvas.create_rectangle(x1, y1, x2, y2, outline="black", fill="grey", tags="square")
+                color = self.color1 if color == self.color2 else self.color2
+
+
+
         for name in self.pieces:
             self.placepiece(name, self.pieces[name][0], self.pieces[name][1])
         self.canvas.tag_raise("piece")
@@ -97,7 +120,9 @@ class GameBoard(tk.Frame):
 
 # if __name__ == "__main__":
 #     root = tk.Tk()
-#     board = GameBoard(root)
+#     walls = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [10, 6], [9, 6], [8, 6], [7, 6], [6, 6], [5, 6], [4, 6]]
+
+#     board = GameBoard(root, walls = walls)
 #     board.pack(side="top", fill="both", expand="true", padx=4, pady=4)
 #     player1 = tk.PhotoImage(data=imagedata)
 #     board.addpiece("player1", player1, 0,0)
