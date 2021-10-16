@@ -59,13 +59,13 @@
             },
             {
                 "epoch": 15000,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 17500,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             }
         ]
     },
@@ -73,68 +73,68 @@
         "results": [
             {
                 "epoch": 500,
-                "reward": 0.0,
-                "reward_per_iteration": 0.0
+                "reward": 3.8,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 600,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 700,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 800,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 900,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 1000,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 2500,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 5000,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 7500,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 10000,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 12500,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 15000,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             },
             {
                 "epoch": 17500,
-                "reward": 0,
-                "reward_per_iteration": 0.0
+                "reward": 3800,
+                "reward_per_iteration": 3.8
             }
         ]
     }
