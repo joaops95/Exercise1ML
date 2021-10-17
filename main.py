@@ -1,9 +1,7 @@
 import numpy as np
 import random
 import time
-from termcolor import colored
 from os import system
-import numpy as np
 import matplotlib.pyplot as plt
 import statistics
 import sys
@@ -15,8 +13,6 @@ import seaborn as sns; sns.set_theme(style='white')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.ticker import MaxNLocator
-
-
 from gameBoard import GameBoard
 class Exercise1:
 
@@ -30,6 +26,8 @@ class Exercise1:
         self.reward = 0
         self.wall_collision_pennalty = -0.01
         self.alpha = 0.7
+        self.runTimeStart = time.time()
+        self.runTimes = []
         self.discount = 0.99
         self.agentPosition = [0, 0]
         self.qtable = qtable
@@ -67,9 +65,10 @@ class Exercise1:
         return [self.agentPosition[0], self.agentPosition[1]]
 
     def reachedPosition(self):
-        self.colisionReward = -10
         if(self.agentPosition == self.goalPosition):
             self.reward += 100
+            self.runTimes.append(time.time() - self.runTimeStart)
+            self.runTimeStart = time.time()
             return True
         return False
 
@@ -113,15 +112,9 @@ class Exercise1:
 
     def updateQValues(self, last_state_index, state_index,action_index):
         reward_s_a = self.getRewardForPositionState(state_index) + self.colisionReward
-
         q_s_a = self.qtable[last_state_index][action_index]
-        # print(state_index)
-        # next_state_index = state_index+1
-        # if(state_index + 1 == len(np.asarray(self.board).flatten())): next_state_index = state_index
         q_ss_aa = self.qtable[state_index]
         alpha = self.alpha
-
-
         self.qtable[last_state_index][action_index] = (1-alpha)*q_s_a+alpha*(reward_s_a + self.discount * np.max(q_ss_aa))
         np.savetxt('text.txt',self.qtable,fmt='%.2f')
 
@@ -134,14 +127,12 @@ class Exercise1:
         self.lastPosition = state
         self.agentPosition = action()
         reached = self.reachedPosition()
-
-        self.updateQValues(self.getAgentStatePosition(self.lastPosition), self.getAgentStatePosition(self.agentPosition), self.mapActionNameToIndex(action.__name__))
+        if(len(self.qtable) > 0):
+            self.updateQValues(self.getAgentStatePosition(self.lastPosition), self.getAgentStatePosition(self.agentPosition), self.mapActionNameToIndex(action.__name__))
 
         if(reached):
             self.agentPosition = self.defaultAgentPosition
             self.game_iterations = 1
-            heatmap = self.qtable.mean(1)/(self.iterations)
-            heatmap = heatmap.reshape(10,10)
 
         return self.agentPosition
 
@@ -192,20 +183,23 @@ def menu():
     print("************Welcome to Lab 1 AI**************")
 
     choice = input("""
-                      A: Run env with Qtable from random actions
-                      B: Run env with Qtable from self values
-                      C: Run env with increasing E-greedy random
-                      D: Run env with increasing E-greedy random, include episodes
+                      A: Run env without Qtable from random actions
+                      B: Run env with Qtable from random actions
+                      C: Run env with Qtable from self values
+                      D: Run env with increasing E-greedy random
+                      E: Run env with increasing E-greedy random, include episodes
 
                       Please enter your choice: """)
 
     if choice == "A" or choice =="a":
-        runEnv(1)
+        runEnv(1, False, False, True)
     elif choice == "B" or choice =="b":
-        runEnv(0)
+        runEnv(1)
     elif choice == "C" or choice =="c":
-        runEnv(1, True)
+        runEnv(0)
     elif choice == "D" or choice =="d":
+        runEnv(1, True)
+    elif choice == "E" or choice =="e":
         runEnv(1, True, True)
     elif choice=="Q" or choice=="q":
         sys.exit
@@ -217,13 +211,15 @@ def menu():
 
 
 
-def runEnv(random_probability = 1, auto_increase = False, include_episodes = False):
+def runEnv(random_probability = 1, auto_increase = False, include_episodes = False, ignoreQtable = False):
     numberOfTests = 1
     test_iterations = 1000
     trainResults = []
     testResults = {}
     num_cols = 10
+    episodes = 30
     num_rows = 10
+    runTimes = []
 
     walls = [
         {
@@ -270,15 +266,16 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
     greatboard.addpiece("player", player1,0 ,0)
     greatboard.addpiece("goal", player1, num_cols - 1,num_rows - 1)
-
+    qtable = np.zeros(shape=(len(np.asarray(game_board).flatten()), 4))
+    if(ignoreQtable):
+        qtable = []
 
 
     for j in range(1, numberOfTests+1):
         agentPosition = [0, 0]
-        episodes = 10
-        epochs = 20000
+        epochs = 20001
         rewards = []
-        qtable = np.zeros(shape=(len(np.asarray(game_board).flatten()), 4))
+
         curr_len = 0
 
         for episode in range(1, episodes+1):
@@ -289,12 +286,13 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
             seed = time.time()
             random.seed(seed)
 
+
             game = Exercise1(game_board, wallPositions, qtable)
 
-            while(game.iterations < epochs - 1):
+            while(game.iterations <= epochs - 1):
                 # time.sleep(0.2)
-                system('clear')
-                if(game.iterations in testEpochs):
+                # system('clear')
+                if(game.iterations in testEpochs and not ignoreQtable):
                     curr_len += 1
                     if(auto_increase): 
                         # [1 , 0]
@@ -331,20 +329,13 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
                 distribution = [random_probability, qtable_probability]
                 
-
                 random_number = random.choices(a_list, distribution)
                 
-
-                # raise Exception
-
                 if(random_number[0] == 1):
 
                     random_action = random.randint(0, 3)
-
-                    last_agentPoistion = agentPosition
                     
                     if(random_action == 0):
-                        
                         agentPosition = game.stateTransaction(agentPosition, game.moveUp)
                     elif(random_action == 1):
                         agentPosition = game.stateTransaction(agentPosition, game.moveDown)
@@ -359,6 +350,7 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
                     action_space = game.qtable[action_space_index]
                     # raise Exception
                     qtable_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
+
                     if(qtable_action == 0):
                         
                         agentPosition = game.stateTransaction(agentPosition, game.moveUp)
@@ -376,19 +368,34 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
                 greatboard.update()
                 # time.sleep(0.05)
+            
+            runTimes.append(game.runTimes[1:])
+            if(not ignoreQtable):
+                heatmap = game.qtable.mean(1)
+                f3, ax5 = plt.subplots(1,1, figsize=(10,10))
 
-            heatmap = game.qtable.mean(1)
-            f3, ax5 = plt.subplots(1,1, figsize=(10,10))
-
-            sns.heatmap(heatmap.reshape(num_cols, num_rows), annot=True, linewidths=.5, fmt=".1f")
-            plt.savefig(f'assets/heatmap_ep{episode}.png', bbox_inches='tight')
-            testResults[episode]['heatmap_fig'] = f'assets/heatmap_ep{episode}.png'
+                sns.heatmap(heatmap.reshape(num_cols, num_rows), annot=True, linewidths=.5, fmt=".1f")
+                plt.savefig(f'assets/heatmap_ep{episode}.png', bbox_inches='tight')
+                testResults[episode]['heatmap_fig'] = f'assets/heatmap_ep{episode}.png'
 
             rewards.append(game.reward)
             qtable = game.qtable
         
             print(rewards)
+            print(runTimes)
             
+            # Creating axes instance
+            # ax = fig.add_axes([0, 0, 1, 1])
+            
+            # Creating plot
+            if(ignoreQtable):
+                fig1, ax = plt.subplots()
+                ax.set_title('Agent execution time (to reach the final goal) per episode')
+                bp = ax.boxplot(runTimes)
+                plt.show()
+
+            
+                        
 
         
         stdev = 0
@@ -398,36 +405,38 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
             'seed':seed,
             'episode': episode,
             'rewards':rewards,
-            'mean': np.mean(rewards),
-            'min': np.min(rewards),
-            'max':np.max(rewards),
+            'mean': float(np.mean(rewards)),
+            'min': float(np.min(rewards)),
+            'max':float(np.max(rewards)),
             'stdev': stdev
         })
+        with open('TrainResults.json', 'w') as outfile:
+            json.dump(trainResults, outfile, indent=4, sort_keys=True)
 
 
-        for train in trainResults:
-            # example data
-            # example error bar values that vary with x-position
-            x = np.arange(1, episodes+1, 1)
-            print(len(x))
-            rewards_y = np.asarray(train['rewards'])
-            y = np.array(rewards_y)
-            print(len(y))
-            error = train['stdev']*np.arange(1, episodes+1, 1)
-            # error bar values w/ different -/+ errors
+        # for train in trainResults:
+        #     # example data
+        #     # example error bar values that vary with x-position
+        #     x = np.arange(1, episodes+1, 1)
+        #     print(len(x))
+        #     rewards_y = np.asarray(train['rewards'])
+        #     y = np.array(rewards_y)
+        #     print(len(y))
+        #     error = train['stdev']*np.arange(1, episodes+1, 1)
+        #     # error bar values w/ different -/+ errors
             
-            lower_error = abs((train['mean'])/train['min'])*rewards_y
-            upper_error = abs((train['mean'])/train['max'])*rewards_y
-            asymmetric_error = [lower_error, upper_error]
+        #     lower_error = abs((train['mean'])/train['min'])*rewards_y
+        #     upper_error = abs((train['mean'])/train['max'])*rewards_y
+        #     asymmetric_error = [lower_error, upper_error]
             
-            fig, (ax0, ax1) = plt.subplots(nrows=2, sharex=True)
-            ax0.errorbar(x, y, yerr=error, fmt='-o')
-            ax0.set_title(f'variable, symmetric error seed {train["seed"]}')
+        #     fig, (ax0, ax1) = plt.subplots(nrows=2, sharex=True)
+        #     ax0.errorbar(x, y, yerr=error, fmt='-o')
+        #     ax0.set_title(f'variable, symmetric error seed {train["seed"]}')
 
-            ax1.errorbar(x, y, xerr=asymmetric_error, fmt='o')
-            ax1.set_title(f'variable, asymmetric error seed {train["seed"]}')
-            ax1.set_yscale('log')
-            plt.show()
+        #     ax1.errorbar(x, y, xerr=asymmetric_error, fmt='o')
+        #     ax1.set_title(f'variable, asymmetric error seed {train["seed"]}')
+        #     ax1.set_yscale('log')
+        #     plt.show()
         greatboard.mainloop()
 
 

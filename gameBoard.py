@@ -1,17 +1,3 @@
-# import numpy as np
-# a = np.array([[1,2, 4, 4], [5, 5, 3,4]])
-# a = a.flatten()
-
-# a = a.reshape(2, 4)
-
-# data = np.asarray([0, 1, 2, 0])
-
-# random_action = np.unravel_index(np.argmax(data, axis=None), data.shape)[0]
-
-# print(random_action)
-
-
-# # print(a)
 import tkinter as tk
 class GameBoard(tk.Frame):
     def __init__(self, parent, rows=10,walls = [], columns=10, size=48, color1="white", color2="white"):
@@ -90,40 +76,3 @@ class GameBoard(tk.Frame):
             self.placepiece(name, self.pieces[name][0], self.pieces[name][1])
         self.canvas.tag_raise("piece")
         self.canvas.tag_lower("square")
-
-
-# image comes from the silk icon set which is under a Creative Commons
-# license. For more information see http://www.famfamfam.com/lab/icons/silk/
-# imagedata = '''
-#     R0lGODlhEAAQAOeSAKx7Fqx8F61/G62CILCJKriIHM+HALKNMNCIANKKANOMALuRK7WOVLWPV9eR
-#     ANiSANuXAN2ZAN6aAN+bAOCcAOKeANCjKOShANKnK+imAOyrAN6qSNaxPfCwAOKyJOKyJvKyANW0
-#     R/S1APW2APW3APa4APe5APm7APm8APq8AO28Ke29LO2/LO2/L+7BM+7BNO6+Re7CMu7BOe7DNPHA
-#     P+/FOO/FO+jGS+/FQO/GO/DHPOjBdfDIPPDJQPDISPDKQPDKRPDIUPHLQ/HLRerMV/HMR/LNSOvH
-#     fvLOS/rNP/LPTvLOVe/LdfPRUfPRU/PSU/LPaPPTVPPUVfTUVvLPe/LScPTWWfTXW/TXXPTXX/XY
-#     Xu/SkvXZYPfVdfXaY/TYcfXaZPXaZvbWfvTYe/XbbvHWl/bdaPbeavvadffea/bebvffbfbdfPvb
-#     e/fgb/Pam/fgcvfgePTbnfbcl/bfivfjdvfjePbemfjelPXeoPjkePbfmvffnvbfofjlgffjkvfh
-#     nvjio/nnhvfjovjmlvzlmvrmpvrrmfzpp/zqq/vqr/zssvvvp/vvqfvvuPvvuvvwvfzzwP//////
-#     ////////////////////////////////////////////////////////////////////////////
-#     ////////////////////////////////////////////////////////////////////////////
-#     ////////////////////////////////////////////////////////////////////////////
-#     ////////////////////////////////////////////////////////////////////////////
-#     ////////////////////////////////////////////////////////////////////////////
-#     /////////////////////////////////////////////////////yH+FUNyZWF0ZWQgd2l0aCBU
-#     aGUgR0lNUAAh+QQBCgD/ACwAAAAAEAAQAAAIzAD/CRxIsKDBfydMlBhxcGAKNIkgPTLUpcPBJIUa
-#     +VEThswfPDQKokB0yE4aMFiiOPnCJ8PAE20Y6VnTQMsUBkWAjKFyQaCJRYLcmOFipYmRHzV89Kkg
-#     kESkOme8XHmCREiOGC/2TBAowhGcAyGkKBnCwwKAFnciCAShKA4RAhyK9MAQwIMMOQ8EdhBDKMuN
-#     BQMEFPigAsoRBQM1BGLjRIiOGSxWBCmToCCMOXSW2HCBo8qWDQcvMMkzCNCbHQga/qMgAYIDBQZU
-#     yxYYEAA7
-# '''
-
-
-
-# if __name__ == "__main__":
-#     root = tk.Tk()
-#     walls = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [10, 6], [9, 6], [8, 6], [7, 6], [6, 6], [5, 6], [4, 6]]
-
-#     board = GameBoard(root, walls = walls)
-#     board.pack(side="top", fill="both", expand="true", padx=4, pady=4)
-#     player1 = tk.PhotoImage(data=imagedata)
-#     board.addpiece("player1", player1, 0,0)
-#     root.mainloop()
