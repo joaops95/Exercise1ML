@@ -11,69 +11,63 @@ import json
 import tkinter as tk
 import matplotlib.cm as cm
 
+import seaborn as sns; sns.set_theme(style='white')
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm, Normalize
+from matplotlib.ticker import MaxNLocator
+
+
 from gameBoard import GameBoard
 class Exercise1:
 
 
     def __init__(self, game_board, walls_positions, qtable):
-        self.board_square = colored(' ▄ ', 'white', attrs=['reverse', 'blink'])
-        self.agent_icon = colored(' ▄ ', 'red', attrs=['reverse', 'blink'])
-        self.reward_icon = colored(' ▄ ', 'blue', attrs=['reverse', 'blink'])
         self.board = game_board 
         self.iterations = 0
         self.game_iterations = 1
+        self.colisionReward = 0
         self.walls_positions = walls_positions
         self.reward = 0
-        self.wall_collision_pennalty = -10
-        self.alpha = 0.2
-        self.discount = 0.6
+        self.wall_collision_pennalty = -0.01
+        self.alpha = 0.7
+        self.discount = 0.99
         self.agentPosition = [0, 0]
         self.qtable = qtable
         self.defaultAgentPosition = [0, 0]
-        # print(len(self.board[1]))
         self.goalPosition = [len(self.board) -1 , len(self.board[0]) -1]
        
 
-    # for printing the board
-    def print_board(self):
-        print(self.goalPosition[0],self.goalPosition[1])
-
-        for ix, i in enumerate(self.board):
-            for jx, j in enumerate(i):
-                if(self.agentPosition == self.goalPosition):
-                    if(ix == self.agentPosition[0] and jx == self.agentPosition[1]): print(self.agent_icon, end = '')
-                    else: print(j, end = '')                
-                else:
-                    if(ix == self.agentPosition[0] and jx == self.agentPosition[1]): print(self.agent_icon, end = '')
-                    else: print(j, end = '')
-                    if(ix == self.goalPosition[0] and jx == self.goalPosition[1]): print(self.reward_icon, end = '')
-                    else: print(j, end = '')
-            print('|')
-
 
     def moveUp(self):
-
+        self.colisionReward = self.wall_collision_pennalty
         if(self.agentPosition[0]-1 >= 0 and [self.agentPosition[0]-1, self.agentPosition[1]] not in self.walls_positions):
+            self.colisionReward = 0
             self.agentPosition = [self.agentPosition[0]-1, self.agentPosition[1]]
         return [self.agentPosition[0], self.agentPosition[1]]
+
     def moveDown(self):
+        self.colisionReward = self.wall_collision_pennalty
         if(self.agentPosition[0]+1 < len(self.board) and [self.agentPosition[0]+1, self.agentPosition[1]] not in self.walls_positions):
+            self.colisionReward = 0
             self.agentPosition = [self.agentPosition[0]+1, self.agentPosition[1]]
         return [self.agentPosition[0], self.agentPosition[1]]
 
     def moveRight(self):
-
+        self.colisionReward = self.wall_collision_pennalty
         if(self.agentPosition[1]+1 < len(self.board[0]) and [self.agentPosition[0], self.agentPosition[1]+1] not in self.walls_positions):
+            self.colisionReward = 0
             self.agentPosition = [self.agentPosition[0], self.agentPosition[1]+1]
         return [self.agentPosition[0], self.agentPosition[1]]
 
     def moveLeft(self):
+        self.colisionReward = self.wall_collision_pennalty
         if(self.agentPosition[1]-1 >= 0 and [self.agentPosition[0],self.agentPosition[1]-1] not in self.walls_positions):
+            self.colisionReward = 0
             self.agentPosition = [self.agentPosition[0], self.agentPosition[1]-1]
         return [self.agentPosition[0], self.agentPosition[1]]
 
     def reachedPosition(self):
-
+        self.colisionReward = -10
         if(self.agentPosition == self.goalPosition):
             self.reward += 100
             return True
@@ -118,7 +112,7 @@ class Exercise1:
         return agentPosition[0]*np.asarray(self.board).shape[1]+agentPosition[1]
 
     def updateQValues(self, last_state_index, state_index,action_index):
-        reward_s_a = self.getRewardForPositionState(state_index)
+        reward_s_a = self.getRewardForPositionState(state_index) + self.colisionReward
 
         q_s_a = self.qtable[last_state_index][action_index]
         # print(state_index)
@@ -138,30 +132,17 @@ class Exercise1:
         self.iterations += 1
         self.game_iterations += 1
         self.lastPosition = state
-        # if(action == "moveUp"): position = self.moveUp()
-        # if(action == "moveDown"): position = self.moveDown()
-        # if(action == "moveRight"): position = self.moveRight()
-        # if(action == "moveLeft"): position = self.moveLeft()
         self.agentPosition = action()
         reached = self.reachedPosition()
 
         self.updateQValues(self.getAgentStatePosition(self.lastPosition), self.getAgentStatePosition(self.agentPosition), self.mapActionNameToIndex(action.__name__))
 
         if(reached):
-            # raise Exception
             self.agentPosition = self.defaultAgentPosition
             self.game_iterations = 1
             heatmap = self.qtable.mean(1)/(self.iterations)
             heatmap = heatmap.reshape(10,10)
-            # a = np.random.random((16, 16))qq
 
-            # plt.imshow(heatmap, cmap='hot', interpolation='nearest')
-
-            # im = plt.imshow(heatmap, cmap=cm.hot)
-            # plt.colorbar(cmap=cm.hot)
-            # plt.show()
-
-        # print(position)
         return self.agentPosition
 
 
@@ -169,16 +150,12 @@ class Exercise1:
         game_test = Exercise1(self.board, self.walls_positions, self.qtable)
         agentPosition = [0, 0]
 
-
-
-
         it = 0
         rewards = []
         while(it < iterations):
             it += 1
             action_space_index = game_test.getAgentStatePosition(agentPosition)
             action_space = self.qtable[action_space_index]
-            # raise Exception
             random_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
 
             # system('clear')
@@ -252,12 +229,12 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
         {
          'bottom_position': 0,
          'top_position': 3,
-         'length': num_cols-3
+         'length': num_cols-1
         },
         {
          'bottom_position': 6,
          'top_position': 0,
-         'length': num_cols-3
+         'length': num_cols
         }
     ]
     wallPositions = []
@@ -278,9 +255,8 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
     random_probability = random_probability
     qtable_probability = 1 - random_probability
 
-    testEpochs = [500, 600, 700, 800, 900, 1000, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 25000, 30000]
+    testEpochs = [200, 500, 600, 700, 800, 900, 1000, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 25000, 30000]
     game_board = [[" "] * num_cols for i in range(num_rows) ]
-    print(game_board)
     # raise Exception
     root = tk.Tk()
 
@@ -299,8 +275,8 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
     for j in range(1, numberOfTests+1):
         agentPosition = [0, 0]
-        episodes = 2
-        epochs = 20001
+        episodes = 10
+        epochs = 20000
         rewards = []
         qtable = np.zeros(shape=(len(np.asarray(game_board).flatten()), 4))
         curr_len = 0
@@ -325,9 +301,7 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
                         qtable_probability = curr_len/ (len(testEpochs)*curr_factor)
                         random_probability = 1 - curr_len/(len(testEpochs)*curr_factor)
 
-                    print("random_probability")
-                    print(random_probability)
-                    print(qtable_probability)
+
                     game_test = game.runTest(test_iterations, greatboard)
                     # stdev = statistics.stdev(rewards)
                     try:
@@ -360,18 +334,13 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
 
                 random_number = random.choices(a_list, distribution)
                 
-                print("random_probability")
-                print(distribution)
-                print(random_number[0])
+
                 # raise Exception
 
                 if(random_number[0] == 1):
 
                     random_action = random.randint(0, 3)
-                    print(random_action)
-                    print("BEFORE")
 
-                    print(agentPosition)
                     last_agentPoistion = agentPosition
                     
                     if(random_action == 0):
@@ -387,7 +356,6 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
                 else:
                     # raise Exception
                     action_space_index = game.getAgentStatePosition(agentPosition)
-                    print(action_space_index)
                     action_space = game.qtable[action_space_index]
                     # raise Exception
                     qtable_action = np.unravel_index(np.argmax(action_space, axis=None), action_space.shape)[0]
@@ -407,45 +375,59 @@ def runEnv(random_probability = 1, auto_increase = False, include_episodes = Fal
                 # time.sleep(0.05)
 
                 greatboard.update()
-
-                print("AFTER")
-                print(agentPosition)
-                print(" ")
-                print(game.iterations)
-                # game.print_board()
                 # time.sleep(0.05)
 
-            heatmap = game.qtable.max(1)/(game.iterations*episode)
-            heatmap = heatmap.reshape(num_rows, num_cols)
-            # a = np.random.random((16, 16))
+            heatmap = game.qtable.mean(1)
+            f3, ax5 = plt.subplots(1,1, figsize=(10,10))
 
-            # plt.imshow(heatmap, cmap='hot', interpolation='nearest')
-
-            im = plt.imshow(heatmap, cmap=cm.hot)
-            plt.colorbar(cmap=cm.hot)
-
+            sns.heatmap(heatmap.reshape(num_cols, num_rows), annot=True, linewidths=.5, fmt=".1f")
             plt.savefig(f'assets/heatmap_ep{episode}.png', bbox_inches='tight')
             testResults[episode]['heatmap_fig'] = f'assets/heatmap_ep{episode}.png'
-
-
-            # game.print_board()
-            # print(f"----Reward {game.reward} Number of iteration: {game.iterations} ----")
 
             rewards.append(game.reward)
             qtable = game.qtable
         
-        print(rewards)
-        stdev = statistics.stdev(rewards)
+            print(rewards)
+            
 
+        
+        stdev = 0
+        if(len(rewards) > 1): stdev = statistics.stdev(rewards, np.mean(rewards))
 
         trainResults.append({
             'seed':seed,
+            'episode': episode,
             'rewards':rewards,
             'mean': np.mean(rewards),
             'min': np.min(rewards),
             'max':np.max(rewards),
             'stdev': stdev
         })
+
+
+        for train in trainResults:
+            # example data
+            # example error bar values that vary with x-position
+            x = np.arange(1, episodes+1, 1)
+            print(len(x))
+            rewards_y = np.asarray(train['rewards'])
+            y = np.array(rewards_y)
+            print(len(y))
+            error = train['stdev']*np.arange(1, episodes+1, 1)
+            # error bar values w/ different -/+ errors
+            
+            lower_error = abs((train['mean'])/train['min'])*rewards_y
+            upper_error = abs((train['mean'])/train['max'])*rewards_y
+            asymmetric_error = [lower_error, upper_error]
+            
+            fig, (ax0, ax1) = plt.subplots(nrows=2, sharex=True)
+            ax0.errorbar(x, y, yerr=error, fmt='-o')
+            ax0.set_title(f'variable, symmetric error seed {train["seed"]}')
+
+            ax1.errorbar(x, y, xerr=asymmetric_error, fmt='o')
+            ax1.set_title(f'variable, asymmetric error seed {train["seed"]}')
+            ax1.set_yscale('log')
+            plt.show()
         greatboard.mainloop()
 
 
@@ -454,25 +436,3 @@ if (__name__ == "__main__"):
     menu()
     
 
-
-    # for test in trainResults:
-    #     # example data
-    #     # example error bar values that vary with x-position
-    #     x = np.arange(1, episodes, 1)
-    #     rewards_y = np.asarray(test['rewards'])
-    #     y = np.array(rewards_y)
-    #     error = test['stdev']*np.arange(1, episodes, 1)
-    #     # error bar values w/ different -/+ errors
-        
-    #     lower_error = abs((test['mean'])/test['min'])*rewards_y
-    #     upper_error = abs((test['mean'])/test['max'])*rewards_y
-    #     asymmetric_error = [lower_error, upper_error]
-        
-    #     fig, (ax0, ax1) = plt.subplots(nrows=2, sharex=True)
-    #     ax0.errorbar(x, y, yerr=error, fmt='-o')
-    #     ax0.set_title(f'variable, symmetric error seed {test["seed"]}')
-
-    #     ax1.errorbar(x, y, xerr=asymmetric_error, fmt='o')
-    #     ax1.set_title(f'variable, asymmetric error seed {test["seed"]}')
-    #     ax1.set_yscale('log')
-    #     plt.show()
